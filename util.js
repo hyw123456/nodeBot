@@ -35,13 +35,24 @@ async function postMsgToSendMsg(message = '') {
 }
 
 async function getSImg(count = 1, isR18 = true) {
-    count = Math.min(10, count)
+    count = Math.min(100, count)
     count = Math.max(count, 1)
-    const res = await needle('GET', 'https://api.nyan.xyz/httpapi/sexphoto/', {r18: isR18, num: count}, {})
-    if (res.statusCode === 200) {
-        return res.body.data.url.length > 1 ? res.body.data.url : res.body.data.url[0]
+    let nums = [], urlsHttp = []
+
+    while (count > 0) {
+        let num = Math.min(10, count)
+        count = count - num
+        nums.push(num)
     }
-    return ''
+    await Promise.all(nums.map(i => {
+        return needle('GET', 'https://api.nyan.xyz/httpapi/sexphoto/', { r18: isR18, num: i }, {}).then(res => {
+            if (res.statusCode === 200) {
+                urlsHttp = urlsHttp.concat(res.body.data.url)
+            }
+        })
+
+    }))
+    return urlsHttp.length === 1 ? urlsHttp[0] : urlsHttp
 }
 
 module.exports = {

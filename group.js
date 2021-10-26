@@ -77,12 +77,12 @@ async function recall(body) {
 }
 
 async function maybeSend(body) {
-    if (enableGroup.includes(body.group_id) && /来\d{0,2}[点份张个][色涩瑟]?图/.test(body.message)) {
+    if (enableGroup.includes(body.group_id) && /来\d*[点份张个][色涩瑟]?图/.test(body.message)) {
         const data = repeatData[body.group_id] || {}
         data.isRepeat = true
-        let count = body.message.match(/\d{1,2}/)
+        let count = body.message.match(/\d+/)
         count = count ? count[0] : 1
-        sendMsgsST(+count, body, /来\d{0,2}[点份张个][色涩瑟]图/.test(body.message))
+        sendMsgsST(+count, body , /来\d*[点份张个][色涩瑟]图/.test(body.message))
         return
     }
 }
@@ -125,7 +125,7 @@ async function sendMsgsST(num = 1, body = {group_id: 297336992}, R18 = true) {
             return {
                 "type": "node",
                 "data": {
-                    "name": "hero" + index,
+                    "name": "hero" + (index+1),
                     "uin": index + 1000,
                     "content": `[CQ:image,file=${i}]`
                 }
