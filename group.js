@@ -4,7 +4,7 @@ const util = require('./util.js');
 const textGet = require('./text.js')
 const schedule = require('node-schedule');
 schedule.scheduleJob('2 0 8 * * *', () => {
-    sendST(undefined, '今日份涩图')
+    sendST(undefined, '今日份的涩图')
 });
 const groups = [655389537,  //我的
     297336992, //咕群
@@ -96,7 +96,8 @@ function maybeSend(body) {
                 return replyAtOther(body.message_id, body.group_id, 827282602)
             case  '真':
                 return replyAtOther(body.message_id, body.group_id, 694099604)
-            case '三': return sendSCYImg(body)
+            case '三':
+                return sendSCYImg(body)
 
         }
         return true
@@ -109,9 +110,10 @@ function replyAtOther(msgId, group_id, id) {
         message: `[CQ:reply,id=${msgId}] [CQ:at,qq=${id}]`
     }, {})
 }
-async function sendSCYImg(body){
+
+async function sendSCYImg(body) {
     return
-   const url = await util.getSCYImg()
+    const url = await util.getSCYImg()
     const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
     const params = {
         group_id: body.group_id,
@@ -122,7 +124,7 @@ async function sendSCYImg(body){
                 "uin": sender.user_id,
                 "content": body.message
             }
-        },{
+        }, {
             "type": "node",
             "data": {
                 "name": '3',
@@ -146,13 +148,35 @@ function atMe(body) {
     }
 }
 
-function sendST(group_id = 297336992, msg = '涩图来啦') {
-    util.getSImg().then(img => {
-        needle('GET', config.url + '/send_group_msg', {
-            group_id: group_id,
-            message: `${msg}[CQ:image,file=${img}]`
-        }, {})
-    })
+async function sendST(group_id = 297336992, msg) {
+    const [url, url2] = await Promise.all([util.getSImg(), util.getSCYImg()])
+    const params = {
+        group_id: group_id,
+        messages: [{
+            "type": "node",
+            "data": {
+                "name": 'hero',
+                "uin": 10085,
+                "content": msg
+            }
+        },{
+            "type": "node",
+            "data": {
+                "name": '2',
+                "uin": 10086,
+                "content": `[CQ:image,file=${url}]`
+            }
+        },
+            {
+                "type": "node",
+                "data": {
+                    "name": '3',
+                    "uin": 10087,
+                    "content": `[CQ:image,file=${url2}]`
+                }
+            }]
+    }
+    needle.post(config.url + '/send_group_forward_msg', params, {headers: {'content-type': 'application/json'}})
 }
 
 async function sendMsgsST(num = 1, body = {group_id: 297336992}, R18 = true) {
