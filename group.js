@@ -77,16 +77,31 @@ async function recall(body) {
 }
 
 async function maybeSend(body) {
-    if (enableGroup.includes(body.group_id) && /来\d*[点份张个][色涩瑟]?图/.test(body.message)) {
+    if (enableGroup.includes(body.group_id) && /来\d*[点份张个].{0,2}图/.test(body.message)) {
         const data = repeatData[body.group_id] || {}
         data.isRepeat = true
-        let count = body.message.match(/\d+/)
-        count = count ? count[0] : 1
-        sendMsgsST(+count, body , /来\d*[点份张个][色涩瑟]图/.test(body.message))
-        return
+        let params = body.message.match(/来(\d*)[点份张个](.{0,2})图/)
+        let count = params[1]||1
+        let type = params[2]
+        switch (type) {
+            case  '': return  sendMsgsST(+count, body , false);
+            case  '涩':
+            case  '色':
+            case  '瑟': return  sendMsgsST(+count, body , true);
+            case  '男色': return  replyAtOther(body.message_id,body.group_id,412983376)
+            case  '福睿':
+            case  '富睿':
+            case  '福瑞': return  replyAtOther(body.message_id,body.group_id,827282602)
+            case  '真': return  replyAtOther(body.message_id,body.group_id,694099604)
+        }
     }
 }
-
+function replyAtOther(msgId,group_id,id){
+    needle('GET', config.url + '/send_group_msg', {
+        group_id: group_id,
+        message: `[CQ:reply,id=${msgId}] [CQ:at,qq=${id}]`
+    }, {})
+}
 function atMe(body) {
     if (body.message && /\[CQ:at,qq=2382843038\]/.test(body.message)) {
         let message = body.message.replace(/\[CQ:at,qq=\d+\]/g, '')
