@@ -4,7 +4,7 @@ const util = require('./util.js');
 const textGet = require('./text.js')
 const schedule = require('node-schedule');
 schedule.scheduleJob('2 0 8 * * *', () => {
-    sendST(undefined, '今日份的涩图')
+    sendST(undefined, '今日份')
 });
 const groups = [655389537,  //我的
     297336992, //咕群
@@ -88,31 +88,41 @@ function maybeSend(body) {
             case  '色':
             case  '瑟':
                 return sendMsgsST(+count, body, true);
-            case  '男色':
-                return replyAtOther(body.message_id, body.group_id, 412983376)
-            case  '福睿':
-            case  '富睿':
-            case  '福瑞':
-                return replyAtOther(body.message_id, body.group_id, 827282602)
-            case  '真':
-                return replyAtOther(body.message_id, body.group_id, 694099604)
-            case '三':
-                return sendSCYImg(body)
+            default: replyAtOther(+count,body ,type)
+                break
 
         }
         return true
     }
 }
 
-function replyAtOther(msgId, group_id, id) {
-    needle('GET', config.url + '/send_group_msg', {
-        group_id: group_id,
-        message: `[CQ:reply,id=${msgId}] [CQ:at,qq=${id}]`
-    }, {})
+async function replyAtOther(count ,body ,type) {
+    const imgs = await util.getBaiduImg(type ,count)
+    const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
+    const params = {
+        group_id: body.group_id,
+        messages: [{
+            "type": "node",
+            "data": {
+                "name": sender.card || sender.nickname,
+                "uin": sender.user_id,
+                "content": body.message
+            }
+        }, ...imgs.map((i, index) => {
+            return {
+                "type": "node",
+                "data": {
+                    "name": "hero" + (index + 1),
+                    "uin": index + 1000,
+                    "content": `[CQ:image,file=${i}]`
+                }
+            }
+        })]
+    }
+    needle.post(config.url + '/send_group_forward_msg', params, {headers: {'content-type': 'application/json'}})
 }
 
 async function sendSCYImg(body) {
-    return
     const url = await util.getSCYImg()
     const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
     const params = {

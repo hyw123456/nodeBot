@@ -4,6 +4,7 @@ const needle = require('needle')
 const config = require("./config.js");
 const qq = '72727777'
 const sj = '123213232'
+const axios = require('axios')
 
 function isEqual(msg = '', newMsg = '') {
     // return newMsg === msg
@@ -45,7 +46,7 @@ async function getSImg(count = 1, isR18 = true) {
         nums.push(num)
     }
     await Promise.all(nums.map(i => {
-        return needle('GET', 'https://api.nyan.xyz/httpapi/sexphoto/', { r18: isR18, num: i }, {}).then(res => {
+        return needle('GET', 'https://api.nyan.xyz/httpapi/sexphoto/', {r18: isR18, num: i}, {}).then(res => {
             if (res.statusCode === 200) {
                 urlsHttp = urlsHttp.concat(res.body.data.url)
             }
@@ -54,14 +55,49 @@ async function getSImg(count = 1, isR18 = true) {
     }))
     return urlsHttp.length === 1 ? urlsHttp[0] : urlsHttp
 }
+
 const scy = require('./scy')
-async function getSCYImg(){
-   const url =  await scy.getSCYImg()
+
+async function getSCYImg() {
+    const url = await scy.getSCYImg()
     return url
 }
+
+async function getBaiduImg(key = '', count = 1) {
+    if(key ==='真')
+        key = '丁真'
+    let url = 'https://image.baidu.com/search/acjson?tn=resultjson_com&logid=11772383357230813664&ipn=rj&ct=201326592&fp=result&cl=&lm=-1&ie=utf-8&oe=utf-8&word=1&pn=30&rn=30&gsm=1e&queryWord=1'
+    url = url.replace(/(queryWord|word)=1/g, '$1=' + encodeURIComponent(key))
+    const res = await axios.get(url, {
+        headers: {
+            "Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+            "Connection": "keep-alive",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0",
+            "Upgrade-Insecure-Requests": "1",
+            'Content-Type': 'text/html; charset=UTF-8'
+        }
+    })
+    const list = res.data.data
+    const filter = getRandom(list, count)
+    return filter.map(i => i.thumbURL)
+}
+
+function getRandom(list, count) {
+    let result = []
+    while (count) {
+        let i = Math.round(Math.random() * (list.length - 1))
+        if(!~result.findIndex(item => item.thumbURL === list[i].thumbURL)){
+            result.push(list[i])
+            count--
+        }
+    }
+    return result
+}
+
 module.exports = {
     isEqual,
     postMsgToSendMsg,
     getSImg,
-    getSCYImg
+    getSCYImg,
+    getBaiduImg
 }
