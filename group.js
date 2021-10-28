@@ -3,7 +3,7 @@ const config = require('./config.js');
 const util = require('./util.js');
 const textGet = require('./text.js')
 const schedule = require('node-schedule');
-schedule.scheduleJob('1 0 8 * * *', () => {
+schedule.scheduleJob('2 0 8 * * *', () => {
     sendST(undefined, '今日份涩图')
 });
 const groups = [655389537,  //我的
@@ -22,7 +22,8 @@ async function repeat(body) {
     if (body.notice_type === 'group_recall') return
     const data = repeatData[body.group_id] || {}
     if (util.isEqual(data.content, body.message)) {
-        if (!data.isRepeat) {
+        data.count--
+        if (!data.count) {
             // 复读
             console.log('复读');
             const msg = await util.postMsgToSendMsg(body.message)
@@ -30,12 +31,11 @@ async function repeat(body) {
                 group_id: body.group_id,
                 message: msg
             }, {})
-            data.isRepeat = true
         }
     } else {
         repeatData[body.group_id] = {
             content: body.message,
-            isRepeat: false,
+            count: 2
         }
     }
 }
@@ -76,32 +76,38 @@ async function recall(body) {
     }
 }
 
-async function maybeSend(body) {
+function maybeSend(body) {
     if (enableGroup.includes(body.group_id) && /来\d*[点份张个].{0,2}图/.test(body.message)) {
-        const data = repeatData[body.group_id] || {}
-        data.isRepeat = true
         let params = body.message.match(/来(\d*)[点份张个](.{0,2})图/)
-        let count = params[1]||1
+        let count = params[1] || 1
         let type = params[2]
         switch (type) {
-            case  '': return  sendMsgsST(+count, body , false);
+            case  '':
+                return sendMsgsST(+count, body, false);
             case  '涩':
             case  '色':
-            case  '瑟': return  sendMsgsST(+count, body , true);
-            case  '男色': return  replyAtOther(body.message_id,body.group_id,412983376)
+            case  '瑟':
+                return sendMsgsST(+count, body, true);
+            case  '男色':
+                return replyAtOther(body.message_id, body.group_id, 412983376)
             case  '福睿':
             case  '富睿':
-            case  '福瑞': return  replyAtOther(body.message_id,body.group_id,827282602)
-            case  '真': return  replyAtOther(body.message_id,body.group_id,694099604)
+            case  '福瑞':
+                return replyAtOther(body.message_id, body.group_id, 827282602)
+            case  '真':
+                return replyAtOther(body.message_id, body.group_id, 694099604)
         }
+        return true
     }
 }
-function replyAtOther(msgId,group_id,id){
+
+function replyAtOther(msgId, group_id, id) {
     needle('GET', config.url + '/send_group_msg', {
         group_id: group_id,
         message: `[CQ:reply,id=${msgId}] [CQ:at,qq=${id}]`
     }, {})
 }
+
 function atMe(body) {
     if (body.message && /\[CQ:at,qq=2382843038\]/.test(body.message)) {
         let message = body.message.replace(/\[CQ:at,qq=\d+\]/g, '')
@@ -110,7 +116,7 @@ function atMe(body) {
             group_id: body.group_id,
             message: `[CQ:reply,id=${body.message_id}] ${text}`
         }, {})
-     return true
+        return true
     }
 }
 
@@ -140,7 +146,7 @@ async function sendMsgsST(num = 1, body = {group_id: 297336992}, R18 = true) {
             return {
                 "type": "node",
                 "data": {
-                    "name": "hero" + (index+1),
+                    "name": "hero" + (index + 1),
                     "uin": index + 1000,
                     "content": `[CQ:image,file=${i}]`
                 }
@@ -149,8 +155,9 @@ async function sendMsgsST(num = 1, body = {group_id: 297336992}, R18 = true) {
     }
     needle.post(config.url + '/send_group_forward_msg', params, {headers: {'content-type': 'application/json'}})
 }
-async function cardNew (body){
-    if(body.notice_type === 'group_card'){
+
+async function cardNew(body) {
+    if (body.notice_type === 'group_card') {
         const res = await getInfoByGroup(body.group_id, body.user_id)
         needle('GET', config.url + '/send_group_msg', {
             group_id: body.group_id,
@@ -158,10 +165,11 @@ async function cardNew (body){
         }, {})
     }
 }
+
 module.exports = function (body) {
     if (groups.includes(body.group_id)) { // 只在咕群生效
-        maybeSend(body)
-        if(atMe(body)) return
+        if (maybeSend(body)) return;
+        if (atMe(body)) return
         repeat(body) //如果有重复2次的就复读消息
         // saveMsg(body)
         recall(body)
