@@ -9,6 +9,8 @@
   "author": "hyw",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
     "express": "^4.17.1",
     "needle": "^3.0.0",
     "node-schedule": "^2.0.0"

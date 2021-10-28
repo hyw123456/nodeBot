@@ -96,6 +96,8 @@ function maybeSend(body) {
                 return replyAtOther(body.message_id, body.group_id, 827282602)
             case  '真':
                 return replyAtOther(body.message_id, body.group_id, 694099604)
+            case '三': return sendSCYImg(body)
+
         }
         return true
     }
@@ -106,6 +108,30 @@ function replyAtOther(msgId, group_id, id) {
         group_id: group_id,
         message: `[CQ:reply,id=${msgId}] [CQ:at,qq=${id}]`
     }, {})
+}
+async function sendSCYImg(body){
+    return
+   const url = await util.getSCYImg()
+    const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
+    const params = {
+        group_id: body.group_id,
+        messages: [{
+            "type": "node",
+            "data": {
+                "name": sender.card || sender.nickname,
+                "uin": sender.user_id,
+                "content": body.message
+            }
+        },{
+            "type": "node",
+            "data": {
+                "name": '3',
+                "uin": 10086,
+                "content": `[CQ:image,file=${url}]`
+            }
+        }]
+    }
+    needle.post(config.url + '/send_group_forward_msg', params, {headers: {'content-type': 'application/json'}})
 }
 
 function atMe(body) {

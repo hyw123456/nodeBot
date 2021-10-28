@@ -54,9 +54,14 @@ async function getSImg(count = 1, isR18 = true) {
     }))
     return urlsHttp.length === 1 ? urlsHttp[0] : urlsHttp
 }
-
+const scy = require('./scy')
+async function getSCYImg(){
+   const url =  await scy.getSCYImg()
+    return url
+}
 module.exports = {
     isEqual,
     postMsgToSendMsg,
-    getSImg
+    getSImg,
+    getSCYImg
 }
