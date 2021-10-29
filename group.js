@@ -56,15 +56,16 @@ async function recall(body) {
                 message = `${operator.card || operator.nickname} 撤回了一条(${sendName})的消息：`
             }
             let senMsg
-            if (/\[CQ:video,file=\w+.video\]/.test(msg.raw_message)) {
+            if (/\[CQ:(video|share|music)[^\]]*\]/.test(msg.raw_message)) {
                 senMsg = msg.raw_message
                 await needle('GET', config.url + '/send_group_msg', {
                     group_id: msg.group_id,
-                    message: message + '[视频:下方]'
+                    message: message + '[下方]'
                 }, {})
                 needle('GET', config.url + '/send_group_msg', {group_id: msg.group_id, message: senMsg}, {})
             } else {
                 senMsg = await util.postMsgToSendMsg(msg.message)
+                if(Math.random() > 0.5) senMsg = '周末穿女装给你们爽爽'
                 needle('GET', config.url + '/send_group_msg', {
                     group_id: msg.group_id,
                     message: message + senMsg
