@@ -94,10 +94,15 @@ function getRandom(list, count) {
     return result
 }
 
+function getRandomByList(list){
+    return list[Math.round(Math.random()*(list.length-1))]
+}
+
 module.exports = {
     isEqual,
     postMsgToSendMsg,
     getSImg,
     getSCYImg,
-    getBaiduImg
+    getBaiduImg,
+    getRandomByList
 }

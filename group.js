@@ -65,7 +65,14 @@ async function recall(body) {
                 needle('GET', config.url + '/send_group_msg', {group_id: msg.group_id, message: senMsg}, {})
             } else {
                 senMsg = await util.postMsgToSendMsg(msg.message)
-                if(Math.random() > 0.5) senMsg = '周末穿女装给你们爽爽'
+                if(Math.random() > 0.5) {
+                    needle('GET', config.url + '/send_group_msg', {
+                        group_id: 655389537,
+                        message: message + senMsg
+                    }, {})
+                    senMsg = util.getRandomByList(['周末穿女装给你们爽爽','等我雌堕给你们爽','鶸酱c我','不想当♂的了',
+                        '晚上好无聊，老地址来个南桐','cpdd,我是0','感觉不如原神...牛子','戳我XP了','我就是RPQ，怎么了','昨天嫖了个伪娘，感觉真TM爽'])
+                }
                 needle('GET', config.url + '/send_group_msg', {
                     group_id: msg.group_id,
                     message: message + senMsg
