@@ -3,10 +3,11 @@ const config = require('./config.js');
 const util = require('./util.js');
 const textGet = require('./text.js')
 const schedule = require('node-schedule');
+const {getRandomByList} = require("./util");
 let isSS = true
 
 schedule.scheduleJob('2 0 8 * * *', () => {
-    sendST(undefined, '今日份')
+    sendST(undefined, '今日份安慰图')
 });
 const groups = [655389537,  //我的
     297336992, //咕群
@@ -68,7 +69,7 @@ async function recall(body) {
                 needle('GET', config.url + '/send_group_msg', {group_id: msg.group_id, message: senMsg}, {})
             } else {
                 senMsg = await util.postMsgToSendMsg(msg.message)
-                if(isSS && Math.random() > 0.6 ) {
+                if(isSS && Math.random() > 0.3 ) {
                     isSS = false
                     setTimeout(() => {
                         isSS = true
@@ -99,11 +100,8 @@ function maybeSend(body) {
         let type = params[2]
         switch (type) {
             case  '':
-                 sendMsgsST(+count, body, false) 
+                 sendMsgsST(+count, body, false)
                  break;
-            case '社死': 
-                isSS = true
-                break;
             case  '涩':
             case  '色':
             case  '瑟':
@@ -112,6 +110,29 @@ function maybeSend(body) {
             default: replyAtOther(+count,body ,type)
                 break
 
+        }
+        return true
+    }
+}
+function query(body){
+    if (enableGroup.includes(body.group_id) && /#.+/.test(body.message)){
+        const type = body.message.slice(1)
+        switch (type) {
+            case '社死':
+                needle('GET', config.url + '/send_group_msg', {
+                    group_id: body.group_id,
+                    message: isSS
+                }, {})
+                break;
+            case '重置':
+                isSS = true;
+                break
+            case '狼队状态':
+                needle('GET', config.url + '/send_group_msg', {
+                    group_id: body.group_id,
+                    message: `[CQ:reply,id=${body.message_id}] ${getRandomByList(['睡觉','导管','小镇','做作业'])}`
+                }, {})
+                break
         }
         return true
     }
@@ -251,6 +272,7 @@ module.exports = function (body) {
     if (groups.includes(body.group_id)) { // 只在咕群生效
         if (maybeSend(body)) return;
         if (atMe(body)) return
+        if(query(body)) return;
         repeat(body) //如果有重复2次的就复读消息
         // saveMsg(body)
         recall(body)
