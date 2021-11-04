@@ -121,16 +121,32 @@ function query(body){
             case '社死':
                 needle('GET', config.url + '/send_group_msg', {
                     group_id: body.group_id,
-                    message: isSS
+                    message: isSS?'开':'关'
                 }, {})
                 break;
             case '重置':
                 isSS = true;
+                needle('GET', config.url + '/send_group_msg', {
+                    group_id: body.group_id,
+                    message: '重置成功'
+                }, {})
                 break
             case '狼队状态':
                 needle('GET', config.url + '/send_group_msg', {
                     group_id: body.group_id,
                     message: `[CQ:reply,id=${body.message_id}] ${getRandomByList(['睡觉','导管','小镇','做作业'])}`
+                }, {})
+                break
+            case '浓度查询':
+            case '二次元浓度查询':
+                needle('GET', config.url + '/send_group_msg', {
+                    group_id: body.group_id,
+                    message: `[CQ:reply,id=${body.message_id}] ${getRandomByList(['50%','80%','90%','100%','200%'])}`
+                }, {})
+                break
+            case '查询群友成分':
+                needle('GET', config.url + '/send_group_msg', {group_id: body.group_id,
+                    message: `[CQ:reply,id=${body.message_id}] 10%柰子，20%二次元，70%的咸鱼`
                 }, {})
                 break
         }
