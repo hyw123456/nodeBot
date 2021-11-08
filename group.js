@@ -45,7 +45,7 @@ async function repeat(body) {
 
 async function recall(body) {
     if ([2382843038, 727295117].includes(body.operator_id)) return
-    if(!enableGroup.includes(body.group_id)) return
+    if (!enableGroup.includes(body.group_id)) return
     if (body.notice_type === 'group_recall') {
         const res = await needle('GET', config.url + '/get_msg', {message_id: body.message_id}, {})
         const msg = res.body.data
@@ -69,18 +69,18 @@ async function recall(body) {
                 needle('GET', config.url + '/send_group_msg', {group_id: msg.group_id, message: senMsg}, {})
             } else {
                 senMsg = await util.postMsgToSendMsg(msg.message)
-                if(isSS && Math.random() > 0.5 ) {
+                if (isSS && Math.random() > 0.5) {
                     isSS = true
                     setTimeout(() => {
                         isSS = true
-                    }, 2*60*1000);
+                    }, 2 * 60 * 1000);
                     needle('GET', config.url + '/send_group_msg', {
                         group_id: 655389537,
                         message: message + senMsg
                     }, {})
-                    senMsg = util.getRandomByList(['周末穿女装给你们爽爽','等我雌堕给你们爽','鶸酱c我','不想当♂的了',
-                        '晚上好无聊，老地址来个南桐','cpdd,我是0','感觉不如原神...牛子','戳我XP了','别来找我了，我不是南桐，那天只是喝多了',
-                        '我就是RPQ，怎么了','昨天嫖了个伪娘，感觉真TM爽','我是傻逼','你绿我也没关系，我喜欢你'])
+                    senMsg = util.getRandomByList(['周末穿女装给你们爽爽', '等我雌堕给你们爽', '鶸酱c我', '不想当♂的了',
+                        '晚上好无聊，老地址来个南桐', 'cpdd,我是0', '感觉不如原神...牛子', '戳我XP了', '别来找我了，我不是南桐，那天只是喝多了',
+                        '我就是RPQ，怎么了', '昨天嫖了个伪娘，感觉真TM爽', '我是傻逼', '你绿我也没关系，我喜欢你'])
                 }
                 needle('GET', config.url + '/send_group_msg', {
                     group_id: msg.group_id,
@@ -100,22 +100,24 @@ function maybeSend(body) {
         let type = params[2]
         switch (type) {
             case  '':
-                 sendMsgsST(+count, body, false)
-                 break;
+                sendMsgsST(+count, body, false)
+                break;
             case  '涩':
             case  '色':
             case  '瑟':
-                 sendMsgsST(+count, body, true)
-                  break;
-            default: replyAtOther(+count,body ,type)
+                sendMsgsST(+count, body, true)
+                break;
+            default:
+                replyAtOther(+count, body, type)
                 break
 
         }
         return true
     }
 }
-function query(body){
-    if (enableGroup.includes(body.group_id) && /#[^#]+/.test(body.message)){
+
+function query(body) {
+    if (enableGroup.includes(body.group_id) && /#[^#]+/.test(body.message)) {
         let keys = body.message.match(/(?<=#)[^#]+/)[0]
 
         keys = keys.replace(/查询?/, '')
@@ -125,8 +127,14 @@ function query(body){
     }
 }
 
-async function replyAtOther(count ,body ,type) {
-    const imgs = await util.PixivImg(type ,count)
+async function replyAtOther(count, body, type) {
+    const imgs = await util.PixivImg(type, count)
+    if (!imgs.length) {
+        return needle('GET', config.url + '/send_group_msg', {
+            group_id: body.group_id,
+            message: `[CQ:reply,id=${body.message_id}] 没找到${type}，换个关键字试试`
+        }, {})
+    }
     const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
     const params = {
         group_id: body.group_id,
@@ -198,7 +206,7 @@ async function sendST(group_id = 297336992, msg) {
                 "uin": 10085,
                 "content": msg
             }
-        },{
+        }, {
             "type": "node",
             "data": {
                 "name": '2',
@@ -259,7 +267,7 @@ module.exports = function (body) {
     if (groups.includes(body.group_id)) { // 只在咕群生效
         if (maybeSend(body)) return;
         if (atMe(body)) return
-        if(query(body)) return;
+        if (query(body)) return;
         repeat(body) //如果有重复2次的就复读消息
         // saveMsg(body)
         recall(body)

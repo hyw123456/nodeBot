@@ -103,10 +103,10 @@ async function PixivImg(key = '', count = 1) {
         }
     })
     let result = res.data.data.map(i => i.urls.original)
-    if(!result.length){
+    if (result.length < count) {
         const res1 = await axios.post('https://api.lolicon.app/setu/v2/', {
             proxy: 'https://floral-disk-7293.h123hh.workers.dev',
-            num: count,
+            num: count - result.length,
             keyword: key,
             r18: 2
         }, {
@@ -114,10 +114,11 @@ async function PixivImg(key = '', count = 1) {
                 'Content-Type': 'application/json'
             }
         })
-        result = res1.data.data.map(i => i.urls.original)
+        result = result.concat(res1.data.data.map(i => i.urls.original))
     }
-    return result
+    return [...new Set(result)]
 }
+
 function getRandom(list, count) {
     let result = []
     while (count) {
