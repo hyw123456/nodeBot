@@ -8,6 +8,7 @@ const axios = require('axios')
 
 function tranKey(key) {
     if (key === '真') return '丁真'
+    if (key === '原批') return '原神'
     if (/^(福瑞|富瑞|富睿)$/.test(key)) return 'furry'
     return key
 }

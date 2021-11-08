@@ -132,7 +132,7 @@ async function replyAtOther(count, body, type) {
     if (!imgs.length) {
         return needle('GET', config.url + '/send_group_msg', {
             group_id: body.group_id,
-            message: `[CQ:reply,id=${body.message_id}] 没找到${type}，换个关键字试试`
+            message: `[CQ:reply,id=${body.message_id}] 没找到${type}，换个XP试试`
         }, {})
     }
     const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
