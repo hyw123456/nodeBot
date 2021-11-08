@@ -6,6 +6,12 @@ const qq = '72727777'
 const sj = '123213232'
 const axios = require('axios')
 
+function tranKey(key) {
+    if (key === '真') return '丁真'
+    if (/^(福瑞|富瑞|富睿)$/.test(key)) return 'furry'
+    return key
+}
+
 function isEqual(msg = '', newMsg = '') {
     // return newMsg === msg
     if (msg === newMsg) return true
@@ -64,7 +70,7 @@ async function getSCYImg() {
 }
 
 async function getBaiduImg(key = '', count = 1) {
-    if(key ==='真')
+    if (key === '真')
         key = '丁真'
     let url = 'https://image.baidu.com/search/acjson?tn=resultjson_com&logid=11772383357230813664&ipn=rj&ct=201326592&fp=result&cl=&lm=-1&ie=utf-8&oe=utf-8&word=1&pn=30&rn=30&gsm=1e&queryWord=1'
     url = url.replace(/(queryWord|word)=1/g, '$1=' + encodeURIComponent(key))
@@ -82,11 +88,41 @@ async function getBaiduImg(key = '', count = 1) {
     return filter.map(i => i.thumbURL)
 }
 
+async function PixivImg(key = '', count = 1) {
+    count = Math.min(100, count)
+    count = Math.max(count, 1)
+    key = tranKey(key)
+    const res = await axios.post('https://api.lolicon.app/setu/v2/', {
+        proxy: 'https://floral-disk-7293.h123hh.workers.dev',
+        num: count,
+        tag: key,
+        r18: 2
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    let result = res.data.data.map(i => i.urls.original)
+    if(!result.length){
+        const res1 = await axios.post('https://api.lolicon.app/setu/v2/', {
+            proxy: 'https://floral-disk-7293.h123hh.workers.dev',
+            num: count,
+            keyword: key,
+            r18: 2
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        result = res1.data.data.map(i => i.urls.original)
+    }
+    return result
+}
 function getRandom(list, count) {
     let result = []
     while (count) {
         let i = Math.round(Math.random() * (list.length - 1))
-        if(!~result.findIndex(item => item.thumbURL === list[i].thumbURL)){
+        if (!~result.findIndex(item => item.thumbURL === list[i].thumbURL)) {
             result.push(list[i])
             count--
         }
@@ -94,8 +130,8 @@ function getRandom(list, count) {
     return result
 }
 
-function getRandomByList(list){
-    return list[Math.round(Math.random()*(list.length-1))]
+function getRandomByList(list) {
+    return list[Math.round(Math.random() * (list.length - 1))]
 }
 
 module.exports = {
@@ -104,5 +140,6 @@ module.exports = {
     getSImg,
     getSCYImg,
     getBaiduImg,
-    getRandomByList
+    getRandomByList,
+    PixivImg
 }

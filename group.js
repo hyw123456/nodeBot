@@ -69,8 +69,8 @@ async function recall(body) {
                 needle('GET', config.url + '/send_group_msg', {group_id: msg.group_id, message: senMsg}, {})
             } else {
                 senMsg = await util.postMsgToSendMsg(msg.message)
-                if(isSS && Math.random() > 0.3 ) {
-                    isSS = false
+                if(isSS && Math.random() > 0.5 ) {
+                    isSS = true
                     setTimeout(() => {
                         isSS = true
                     }, 2*60*1000);
@@ -94,8 +94,8 @@ async function recall(body) {
 }
 
 function maybeSend(body) {
-    if (enableGroup.includes(body.group_id) && /来\d*[点份张个].{0,2}图/.test(body.message)) {
-        let params = body.message.match(/来(\d*)[点份张个](.{0,2})图/)
+    if (enableGroup.includes(body.group_id) && /来\d*[点份张个][^图]+图/.test(body.message)) {
+        let params = body.message.match(/来(\d*)[点份张个]([^图]+)图/)
         let count = params[1] || 1
         let type = params[2]
         switch (type) {
@@ -115,47 +115,18 @@ function maybeSend(body) {
     }
 }
 function query(body){
-    if (enableGroup.includes(body.group_id) && /#.+/.test(body.message)){
-        const type = body.message.slice(1)
-        switch (type) {
-            case '社死':
-                needle('GET', config.url + '/send_group_msg', {
-                    group_id: body.group_id,
-                    message: isSS?'开':'关'
-                }, {})
-                break;
-            case '重置':
-                isSS = true;
-                needle('GET', config.url + '/send_group_msg', {
-                    group_id: body.group_id,
-                    message: '重置成功'
-                }, {})
-                break
-            case '狼队状态':
-                needle('GET', config.url + '/send_group_msg', {
-                    group_id: body.group_id,
-                    message: `[CQ:reply,id=${body.message_id}] ${getRandomByList(['睡觉','导管','小镇','做作业'])}`
-                }, {})
-                break
-            case '浓度查询':
-            case '二次元浓度查询':
-                needle('GET', config.url + '/send_group_msg', {
-                    group_id: body.group_id,
-                    message: `[CQ:reply,id=${body.message_id}] ${getRandomByList(['50%','80%','90%','100%','200%'])}`
-                }, {})
-                break
-            case '查询群友成分':
-                needle('GET', config.url + '/send_group_msg', {group_id: body.group_id,
-                    message: `[CQ:reply,id=${body.message_id}] 10%柰子，20%二次元，70%的咸鱼`
-                }, {})
-                break
-        }
+    if (enableGroup.includes(body.group_id) && /#[^#]+/.test(body.message)){
+        let keys = body.message.match(/(?<=#)[^#]+/)[0]
+
+        keys = keys.replace(/查询?/, '')
+
+
         return true
     }
 }
 
 async function replyAtOther(count ,body ,type) {
-    const imgs = await util.getBaiduImg(type ,count)
+    const imgs = await util.PixivImg(type ,count)
     const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
     const params = {
         group_id: body.group_id,
