@@ -65,9 +65,9 @@ async function getSImg(count = 1, isR18 = true) {
 
 const scy = require('./scy')
 
-async function getSCYImg() {
-    const url = await scy.getSCYImg()
-    return url
+async function getSCYImg(count=1) {
+    const url = await scy.getSCYImg(count)
+    return count===1?url[0]:url
 }
 
 async function getBaiduImg(key = '', count = 1) {

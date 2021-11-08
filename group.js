@@ -107,6 +107,9 @@ function maybeSend(body) {
             case  '瑟':
                 sendMsgsST(+count, body, true)
                 break;
+            case '3':
+                sendSCYImg(body,+count)
+                break;
             default:
                 replyAtOther(+count, body, type)
                 break
@@ -159,8 +162,9 @@ async function replyAtOther(count, body, type) {
     needle.post(config.url + '/send_group_forward_msg', params, {headers: {'content-type': 'application/json'}})
 }
 
-async function sendSCYImg(body) {
-    const url = await util.getSCYImg()
+async function sendSCYImg(body, count=1) {
+    let urls = await util.getSCYImg(count)
+    urls = Array.isArray(urls)?urls:[urls]
     const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
     const params = {
         group_id: body.group_id,
@@ -171,14 +175,16 @@ async function sendSCYImg(body) {
                 "uin": sender.user_id,
                 "content": body.message
             }
-        }, {
-            "type": "node",
-            "data": {
-                "name": '3',
-                "uin": 10086,
-                "content": `[CQ:image,file=${url}]`
+        }, ...urls.map((i, index) => {
+            return {
+                "type": "node",
+                "data": {
+                    "name": "hero" + (index + 1),
+                    "uin": index + 1000,
+                    "content": `[CQ:image,file=${i}]`
+                }
             }
-        }]
+        })]
     }
     needle.post(config.url + '/send_group_forward_msg', params, {headers: {'content-type': 'application/json'}})
 }
