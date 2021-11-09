@@ -5,7 +5,7 @@ const path = '/404'
 
 async function getSCYImg(count = 1) {
 
-    const srcs =await Promise.all(Array.apply(null, {length: 1}).map(() => {
+    const srcs =await Promise.all(Array.apply(null, {length: count}).map(() => {
         return axios.get(scyUrl + path).then(res => {
             const $ = cheerio.load(res.data);
             const src = $('img.img_class')[0].attribs.src
