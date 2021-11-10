@@ -7,7 +7,7 @@ const {getRandomByList} = require("./util");
 let isSS = true
 
 schedule.scheduleJob('2 0 8 * * *', () => {
-    sendST(undefined, '今日份安慰图')
+    sendST(undefined, '今天你波奇了吗')
 });
 const groups = [655389537,  //我的
     297336992, //咕群
@@ -29,7 +29,12 @@ async function repeat(body) {
         if (!data.count) {
             // 复读
             console.log('复读');
-            const msg = await util.postMsgToSendMsg(body.message)
+            let msg
+            if (Math.random() > .5) {
+                msg = await util.postMsgToSendMsg(body.message)
+            } else {
+                msg = getRandomByList(['打断复读', '不想复读', '禁止复读', '楼上sb', '楼下sb', '╭(╯^╰)╮', '哼~'])
+            }
             needle('GET', config.url + '/send_group_msg', {
                 group_id: body.group_id,
                 message: msg
@@ -108,7 +113,7 @@ function maybeSend(body) {
                 sendMsgsST(+count, body, true)
                 break;
             case '3':
-                sendSCYImg(body,+count)
+                sendSCYImg(body, +count)
                 break;
             default:
                 replyAtOther(+count, body, type)
@@ -162,9 +167,9 @@ async function replyAtOther(count, body, type) {
     needle.post(config.url + '/send_group_forward_msg', params, {headers: {'content-type': 'application/json'}})
 }
 
-async function sendSCYImg(body, count=1) {
+async function sendSCYImg(body, count = 1) {
     let urls = await util.getSCYImg(count)
-    urls = Array.isArray(urls)?urls:[urls]
+    urls = Array.isArray(urls) ? urls : [urls]
     const sender = await getInfoByGroup(body.group_id, body.sender.user_id)
     const params = {
         group_id: body.group_id,
@@ -197,8 +202,23 @@ function atMe(body) {
             group_id: body.group_id,
             message: `[CQ:reply,id=${body.message_id}] ${text}`
         }, {})
+
         return true
     }
+}
+function isAtAll(body){
+    if(/@全体成员/.test(body.message)){
+       atAll(body)
+        return true
+    }
+}
+async function atAll(body) {
+    const res = await needle('GET', config.url + '/get_group_member_list', {group_id: body.group_id}, {})
+    const msg = res.body.data.filter(i => i.user_id != '727295117').map(i => `[CQ:at,qq=${i.user_id}]`).join('')
+    needle('GET', config.url + '/send_group_msg', {
+        group_id: body.group_id,
+        message: msg
+    }, {})
 }
 
 async function sendST(group_id = 297336992, msg) {
@@ -271,6 +291,7 @@ async function cardNew(body) {
 
 module.exports = function (body) {
     if (groups.includes(body.group_id)) { // 只在咕群生效
+        if(isAtAll(body)) return;
         if (maybeSend(body)) return;
         if (atMe(body)) return
         if (query(body)) return;
