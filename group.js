@@ -33,7 +33,7 @@ async function repeat(body) {
             if (Math.random() > .5) {
                 msg = await util.postMsgToSendMsg(body.message)
             } else {
-                msg = getRandomByList(['打断复读', '不想复读', '禁止复读', '楼上sb', '楼下sb', '╭(╯^╰)╮', '哼~'])
+                msg = getRandomByList(['打断复读', '禁止复读', '楼上sb', '楼下sb', '╭(╯^╰)╮', '哼~', '？'])
             }
             needle('GET', config.url + '/send_group_msg', {
                 group_id: body.group_id,
@@ -99,8 +99,8 @@ async function recall(body) {
 }
 
 function maybeSend(body) {
-    if (enableGroup.includes(body.group_id) && /来\d*[点份张个][^图]+图/.test(body.message)) {
-        let params = body.message.match(/来(\d*)[点份张个]([^图]+)图/)
+    if (enableGroup.includes(body.group_id) && /\d*[点份张个][^图]+图/.test(body.message)) {
+        let params = body.message.match(/(\d*)[点份张个]([^图]+)图/)
         let count = params[1] || 1
         let type = params[2]
         switch (type) {
