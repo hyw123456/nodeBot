@@ -297,7 +297,7 @@ module.exports = function (body) {
         if (query(body)) return;
         repeat(body) //如果有重复2次的就复读消息
         // saveMsg(body)
-        recall(body)
+        // recall(body)
         cardNew(body)
     }
 }
