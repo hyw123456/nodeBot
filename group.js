@@ -99,7 +99,7 @@ async function recall(body) {
 }
 
 function maybeSend(body) {
-    if (enableGroup.includes(body.group_id) && /\d*[点份张个][^图]+图/.test(body.message)) {
+    if (enableGroup.includes(body.group_id) && /来\d*[点份张个][^图]+图/.test(body.message)) {
         let params = body.message.match(/(\d*)[点份张个]([^图]+)图/)
         let count = params[1] || 1
         let type = params[2]
