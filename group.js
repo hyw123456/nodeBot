@@ -30,11 +30,7 @@ async function repeat(body) {
             // 复读
             console.log('复读');
             let msg
-            if (Math.random() > .5) {
                 msg = await util.postMsgToSendMsg(body.message)
-            } else {
-                msg = getRandomByList(['打断复读', '禁止复读', '楼上sb', '楼下sb', '╭(╯^╰)╮', '哼~', '？'])
-            }
             needle('GET', config.url + '/send_group_msg', {
                 group_id: body.group_id,
                 message: msg
