@@ -221,7 +221,7 @@ async function atAll(body) {
 }
 
 async function sendST(group_id = 297336992, msg) {
-    const [url, {url:url2, code}] = await Promise.all([util.getSImg(), getSCYImgAndCode()])
+    const [url, {url: url2, code}] = await Promise.all([util.getSImg(), getSCYImgAndCode()])
     const params = {
         group_id: group_id,
         messages: [{
