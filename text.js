@@ -1,6 +1,7 @@
 const params = {
-    主题: 'nmsl',随机种子:2602213+Math.round(Math.random()*1000)
+    主题: 'nmsl', 随机种子: 2602213 + Math.round(Math.random() * 1000)
 }
+
 function 获取网址参数(参数) {
     return params[参数]
 }
@@ -95,63 +96,63 @@ let 下取整 = Math.floor;
 
 let 同余乘数 = 214013;
 let 同余加数 = 2531011;
-let 同余模 = Math.pow(2,32);
+let 同余模 = Math.pow(2, 32);
 
-let 随机种子 = 获取网址参数('随机种子') || 下取整( 随便取一个数(0, 同余模, Math.random) );
+let 随机种子 = 获取网址参数('随机种子') || 下取整(随便取一个数(0, 同余模, Math.random));
 
 // LCG https://en.wikipedia.org/wiki/Linear_congruential_generator
 function 同余发生器() {
-    随机种子 = ( 随机种子 * 同余乘数 + 同余加数 ) % 同余模;
+    随机种子 = (随机种子 * 同余乘数 + 同余加数) % 同余模;
     return 随机种子 / 同余模;
 };
 
-function 随便取一句(列表){
-    let 坐标 = 下取整( 同余发生器() * 列表.length );
+function 随便取一句(列表) {
+    let 坐标 = 下取整(同余发生器() * 列表.length);
     return 列表[坐标];
 }
 
-function 随便取一个数(最小值 = 0,最大值 = 100,随机数函数 = 同余发生器){
-    let 数字 = 随机数函数() * ( 最大值 - 最小值 ) + 最小值;
+function 随便取一个数(最小值 = 0, 最大值 = 100, 随机数函数 = 同余发生器) {
+    let 数字 = 随机数函数() * (最大值 - 最小值) + 最小值;
     return 数字;
 }
 
-function 来点名人名言(){
+function 来点名人名言() {
     let 名言 = 随便取一句(名人名言)
-    名言 = 名言.replace('恁野爹曾经说过', 随便取一句(前面垫话) )
-    名言 = 名言.replace('这不禁令恁野爹深思', 随便取一句(后面垫话) )
+    名言 = 名言.replace('恁野爹曾经说过', 随便取一句(前面垫话))
+    名言 = 名言.replace('这不禁令恁野爹深思', 随便取一句(后面垫话))
     return 名言
 }
 
-function 来点论述(){
+function 来点论述() {
     let 句子 = 随便取一句(论述);
-    句子 = 句子.replace(RegExp('主题', 'g'),主题);
+    句子 = 句子.replace(RegExp('主题', 'g'), 主题);
     return 句子;
 }
 
-function 增加段落(段落){
-    if(段落[段落.length-1] === ' '){
-        段落 = 段落.slice(0,-2)
+function 增加段落(段落) {
+    if (段落[段落.length - 1] === ' ') {
+        段落 = 段落.slice(0, -2)
     }
     return '　　' + 段落 + '。 '
 }
 
-function 生成文章(){
+function 生成文章() {
     params.随机种子 = 随机种子
     主题 = 获取网址参数('主题') || 'nmsl'
     let 文章 = []
     let 段落 = '';
     let 文章长度 = 0;
-    while( 文章长度 < 1000 ){
+    while (文章长度 < 1000) {
         let 随机数 = 随便取一个数();
-        if(随机数 < 5 && 段落.length > 200){
+        if (随机数 < 5 && 段落.length > 200) {
             段落 = 增加段落(段落);
             文章.push(段落);
             段落 = '';
-        }else if(随机数 < 20){
+        } else if (随机数 < 20) {
             let 句子 = 来点名人名言();
             文章长度 = 文章长度 + 句子.length;
             段落 = 段落 + 句子;
-        }else{
+        } else {
             let 句子 = 来点论述();
             文章长度 = 文章长度 + 句子.length;
             段落 = 段落 + 句子;
@@ -162,10 +163,12 @@ function 生成文章(){
 
     return 文章
 }
-function getText(主题 = 'nmsl'){
+
+function getText(主题 = 'nmsl') {
     params.主题 = 主题
     return 生成文章()
 }
+
 module.exports = {
-   getText
+    getText
 }
