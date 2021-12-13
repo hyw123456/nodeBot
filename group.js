@@ -4,6 +4,7 @@ const util = require('./util.js');
 const textGet = require('./text.js')
 const schedule = require('node-schedule');
 const {getRandomByList} = require("./util");
+const {getSCYImgAndCode} = require('./scy')
 let isSS = true
 
 schedule.scheduleJob('2 0 8 * * *', () => {
@@ -30,7 +31,7 @@ async function repeat(body) {
             // 复读
             console.log('复读');
             let msg
-                msg = await util.postMsgToSendMsg(body.message)
+            msg = await util.postMsgToSendMsg(body.message)
             needle('GET', config.url + '/send_group_msg', {
                 group_id: body.group_id,
                 message: msg
@@ -202,12 +203,14 @@ function atMe(body) {
         return true
     }
 }
-function isAtAll(body){
-    if(/@全体成员/.test(body.message)){
-       atAll(body)
+
+function isAtAll(body) {
+    if (/@全体成员/.test(body.message)) {
+        atAll(body)
         return true
     }
 }
+
 async function atAll(body) {
     const res = await needle('GET', config.url + '/get_group_member_list', {group_id: body.group_id}, {})
     const msg = res.body.data.filter(i => i.user_id != '727295117').map(i => `[CQ:at,qq=${i.user_id}]`).join('')
@@ -218,7 +221,7 @@ async function atAll(body) {
 }
 
 async function sendST(group_id = 297336992, msg) {
-    const [url, url2] = await Promise.all([util.getSImg(), util.getSCYImg()])
+    const [url, {url:url2, code}] = await Promise.all([util.getSImg(), getSCYImgAndCode()])
     const params = {
         group_id: group_id,
         messages: [{
@@ -242,6 +245,14 @@ async function sendST(group_id = 297336992, msg) {
                     "name": '3',
                     "uin": 10087,
                     "content": `[CQ:image,file=${url2}]`
+                }
+            },
+            {
+                "type": "node",
+                "data": {
+                    "name": '车牌',
+                    "uin": 10088,
+                    "content": code
                 }
             }]
     }
@@ -287,7 +298,7 @@ async function cardNew(body) {
 
 module.exports = function (body) {
     if (groups.includes(body.group_id)) { // 只在咕群生效
-        if(isAtAll(body)) return;
+        if (isAtAll(body)) return;
         if (maybeSend(body)) return;
         if (atMe(body)) return
         if (query(body)) return;

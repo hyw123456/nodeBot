@@ -14,8 +14,15 @@ async function getSCYImg(count = 1) {
     }))
     return srcs
 }
-
-
+async function getSCYImgAndCode() {
+const res = await axios.get(scyUrl + path)
+    const $ = cheerio.load(res.data);
+    const src = $('img.img_class')[0].attribs.src
+    const url = scyUrl + src.slice(1)
+    const code = $('#list p').text()
+    return {url,code}
+}
 module.exports = {
-    getSCYImg
+    getSCYImg,
+    getSCYImgAndCode
 }
