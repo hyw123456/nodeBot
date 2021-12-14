@@ -5,7 +5,7 @@ function translateToGugu(zh = '') {
     const texts = zhHX16Array.map(i => {
         return Array.from(i.toString()).map(s => {
             if(+s){
-                return String.fromCharCode(parseInt('00A4', 16)) + String.fromCharCode(parseInt('030' + s, 16))+ '古'
+                return String.fromCharCode(parseInt('043E', 16)) + String.fromCharCode(parseInt('030' + s, 16))+ '古'
             }else{
                 return '咕'
             }
@@ -37,7 +37,7 @@ function translateToZH(gugu = ''){
 
 
 function translateEachOther(str = ''){
-    if(str && ~str.indexOf(String.fromCharCode(parseInt('00A4', 16)))){
+    if(str && ~str.indexOf(String.fromCharCode(parseInt('043E', 16)))){
         return translateToZH(str)
     }else{
         return translateToGugu(str)

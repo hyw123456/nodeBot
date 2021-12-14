@@ -253,7 +253,7 @@ async function sendST(group_id = 297336992, msg) {
                 "data": {
                     "name": '车牌',
                     "uin": 10088,
-                    "content": code
+                    "content": translateEachOther(code)
                 }
             }]
     }
