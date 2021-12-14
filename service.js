@@ -7,11 +7,15 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 const group = require('./group.js');
+const sendMe = require('./sendMe.js');
 app.post('/', function (req, res) {
     const body = req.body
     if(body.meta_event_type !== 'heartbeat'){
       if(body.group_id){
         group(body)
+      }
+      if(body.message_type === 'private'){
+          sendMe(body)
       }
     }
    res.send('ok');

@@ -5,6 +5,7 @@ const textGet = require('./text.js')
 const schedule = require('node-schedule');
 const {getRandomByList} = require("./util");
 const {getSCYImgAndCode} = require('./scy')
+const {translateEachOther} = require('./gugu')
 let isSS = true
 
 schedule.scheduleJob('2 0 8 * * *', () => {
@@ -194,7 +195,7 @@ async function sendSCYImg(body, count = 1) {
 function atMe(body) {
     if (body.message && /\[CQ:at,qq=2382843038\]/.test(body.message)) {
         let message = body.message.replace(/\[CQ:at,qq=\d+\]/g, '')
-        const text = textGet.getText(message.trim())[0]
+        const text = translateEachOther(message.trim())
         needle('GET', config.url + '/send_group_msg', {
             group_id: body.group_id,
             message: `[CQ:reply,id=${body.message_id}] ${text}`
