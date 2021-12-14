@@ -6,6 +6,7 @@ function tran(body){
     const text = translateEachOther(message.trim())
     needle('GET', config.url + '/send_private_msg', {
         user_id: body.user_id,
+        // group_id: '297336992',
         message: `${text}`
     }, {})
 }

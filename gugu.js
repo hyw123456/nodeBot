@@ -1,10 +1,10 @@
 function translateToGugu(zh = '') {
     const zhHX16Array = Array.from(zh).map(i => {
-        return i.charCodeAt()
+        return i.charCodeAt().toString(16)
     })
     const texts = zhHX16Array.map(i => {
-        return Array.from(i.toString()).map(s => {
-            if(+s){
+        return Array.from(i).map(s => {
+            if(s!=='0'){
                 return String.fromCharCode(parseInt('043E', 16)) + String.fromCharCode(parseInt('030' + s, 16))+ '古'
             }else{
                 return '咕'
@@ -30,11 +30,10 @@ function translateToZH(gugu = ''){
             return  ''
         }
     }).filter(i => i).map(i => {
-        return String.fromCharCode(i)
+        return String.fromCharCode(parseInt(i, 16))
     }).join('')
    return result
 }
-
 
 function translateEachOther(str = ''){
     if(str && ~str.indexOf(String.fromCharCode(parseInt('043E', 16)))){
