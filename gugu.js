@@ -11,10 +11,10 @@ function translateToGugu(zh = '') {
             }
         }).join('')
     })
-    return texts.join(String.fromCharCode(parseInt('fff0', 16)))
+    return texts.join(' ')
 }
 function translateToZH(gugu = ''){
-    const arrs = gugu.split(String.fromCharCode(parseInt('fff0', 16)))
+    const arrs = gugu.split(' ')
     const result = arrs.map(i => {
         const r = i.match(/..古|咕/g)
         if(r&&r.length){
@@ -34,6 +34,7 @@ function translateToZH(gugu = ''){
     }).join('')
    return result
 }
+
 
 function translateEachOther(str = ''){
     if(str && ~str.indexOf(String.fromCharCode(parseInt('043E', 16)))){
