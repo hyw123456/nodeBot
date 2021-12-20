@@ -5,6 +5,7 @@ const config = require("./config.js");
 const qq = '72727777'
 const sj = '123213232'
 const axios = require('axios')
+const fs = require('fs')
 
 function tranKey(key) {
     if (key === '真') return '丁真'
@@ -65,9 +66,9 @@ async function getSImg(count = 1, isR18 = true) {
 
 const scy = require('./scy')
 
-async function getSCYImg(count=1) {
+async function getSCYImg(count = 1) {
     const url = await scy.getSCYImg(count)
-    return count===1?url[0]:url
+    return count === 1 ? url[0] : url
 }
 
 async function getBaiduImg(key = '', count = 1) {
@@ -136,6 +137,16 @@ function getRandomByList(list) {
     return list[Math.round(Math.random() * (list.length - 1))]
 }
 
+function saveData(data, path, callback = () => {}) {
+    data = data+''
+    fs.writeFile(path, data, callback);
+}
+
+function getData(path) {
+    var data = fs.readFileSync(path);
+    return data.toString()
+}
+
 module.exports = {
     isEqual,
     postMsgToSendMsg,
@@ -143,5 +154,7 @@ module.exports = {
     getSCYImg,
     getBaiduImg,
     getRandomByList,
-    PixivImg
+    PixivImg,
+    saveData,
+    getData
 }

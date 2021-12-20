@@ -8,6 +8,8 @@ app.use(bodyParser.json());
 
 const group = require('./group.js');
 const sendMe = require('./sendMe.js');
+const loop = require('./loopSearch.js')
+loop()
 app.post('/', function (req, res) {
     const body = req.body
     if(body.meta_event_type !== 'heartbeat'){
