@@ -11,6 +11,18 @@ let time = 90 * 1000, startTime = 30 * 60 * 1000, isStart = false
 let isSendNotice = false
 
 function searchLiveBroadcast() {
+    const hour = new Date().getHours()
+    if(hour<9){
+        isStart = false
+        isSendNotice = false
+        setTimeout(searchLiveBroadcast, 60*60*1000)
+        return
+    }
+    if(hour < 17){
+        time = 3*60*1000
+    }else{
+        time = 90 * 1000
+    }
     needle('GET', url + '22800732', {}, {}).then(res => {
         const result = /html\>\<[^<>]*202\d[^<>]*\>$/.test(res.body)
         if (result) {
