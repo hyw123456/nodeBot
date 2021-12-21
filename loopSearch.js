@@ -2,11 +2,12 @@
 const needle = require("needle");
 const config = require("./config.js");
 const {getRandomByList} = require("./util");
+const moment =require('moment')
 
 const url = 'https://live.bilibili.com/'
 // 22800732
 // 1475443 气浪
-let time = 100 * 1000, startTime = 2 * 60 * 60 * 1000
+let time = 100 * 1000, startTime = 60 * 60 * 1000
 
 function startTask(id = '22800732', groupId = '1143106153') {
     let isStart = false, isSendNotice = false
@@ -24,8 +25,8 @@ function startTask(id = '22800732', groupId = '1143106153') {
             time = 100 * 1000
         }
         needle('GET', url + id, {}, {}).then(res => {
-            const result = /html\>\<[^<>]*202\d[^<>]*\>$/.test(res.body)
-            if (result) {
+            const time = res.body.match(/html\>\<[^<>]*(20\d{2}[^-]*-\s*.........)[^<>]*\>$/)
+            if (time&&time[1]&&moment().diff(moment(time[1].trim(), 'YYYY.MM.DD - HH:mm:ss'), 'minute') < 10) {
                 // 开播了
                 isStart = true
                 if (isSendNotice) {
@@ -36,11 +37,10 @@ function startTask(id = '22800732', groupId = '1143106153') {
                 }
             }
             const end = /html\>$/.test(res.body)
-            if (end) {
+            if (end || (time&&time[1]&&moment().diff(moment(time[1].trim(), 'YYYY.MM.DD - HH:mm:ss'), 'minute') > 60)) {
                 isStart = false
                 isSendNotice = true
             }
-
             setTimeout(searchLiveBroadcast, isStart ? startTime : time)
         }).catch(() => {
             setTimeout(searchLiveBroadcast, isStart ? startTime : time)
@@ -66,7 +66,6 @@ async function sendMsg(id, groupId , image = '') {
         message: msg + getRandomByList(['开播啦', '菠萝', '今日份的直播她蕾了'])
     }, {})
 }
-
 
 module.exports = function () {
     startTask()
