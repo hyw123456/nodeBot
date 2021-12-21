@@ -6,7 +6,7 @@ const {getRandomByList} = require("./util");
 const url = 'https://live.bilibili.com/'
 // 22800732
 // 1475443 气浪
-let time = 100 * 1000, startTime = 30 * 60 * 1000
+let time = 100 * 1000, startTime = 2 * 60 * 60 * 1000
 
 function startTask(id = '22800732', groupId = '1143106153') {
     let isStart = false, isSendNotice = false
@@ -30,7 +30,9 @@ function startTask(id = '22800732', groupId = '1143106153') {
                 isStart = true
                 if (isSendNotice) {
                     isSendNotice = false
-                    sendMsg(id, groupId)
+                    const imgs = res.body.match(/"keyframe":\s*"(http:[^"]*\.jpg)"/)
+                    const image = imgs&&imgs[1]&&imgs[1].replace(/\\u002F/g,'/')
+                    sendMsg(id, groupId, image)
                 }
             }
             const end = /html\>$/.test(res.body)
@@ -48,7 +50,7 @@ function startTask(id = '22800732', groupId = '1143106153') {
 }
 
 
-async function sendMsg(id, groupId) {
+async function sendMsg(id, groupId , image = '') {
     const res = await needle('GET', config.url + '/get_group_member_list', {group_id: groupId}, {})
     let msg = res.body.data.filter(i => i.user_id != '1165775261').map(i => `[CQ:at,qq=${i.user_id}]`).join('')
     if (groupId === '297336992') {
@@ -56,7 +58,7 @@ async function sendMsg(id, groupId) {
     }
     needle('GET', config.url + '/send_group_msg', {
         group_id: groupId,
-        message: `[CQ:share,url=https://live.bilibili.com/${id},title=${groupId === '297336992' ? '狼队的直播' : '耳仔的直播'}]`
+        message: `[CQ:share,url=https://live.bilibili.com/${id},title=${groupId === '297336992' ? '狼队的直播' : '耳仔的直播'},image=${image}]`
     }, {})
 
     needle('GET', config.url + '/send_group_msg', {
@@ -64,6 +66,7 @@ async function sendMsg(id, groupId) {
         message: msg + getRandomByList(['开播啦', '菠萝', '今日份的直播她蕾了'])
     }, {})
 }
+
 
 module.exports = function () {
     startTask()
