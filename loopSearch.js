@@ -68,7 +68,7 @@ async function sendMsg(id, groupId , image = '') {
 }
 
 module.exports = function () {
-    startTask()
+    // startTask()
     setTimeout(() => {
         startTask('1475443', '297336992') //咕群
     }, 50000)
