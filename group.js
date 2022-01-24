@@ -6,6 +6,7 @@ const schedule = require('node-schedule');
 const {getRandomByList} = require("./util");
 const {getSCYImgAndCode} = require('./scy')
 const {translateEachOther} = require('./gugu')
+const {getInfo} = require('./7d2d')
 let isSS = true
 
 schedule.scheduleJob('2 0 8 * * *', () => {
@@ -41,7 +42,7 @@ async function repeat(body) {
     } else {
         repeatData[body.group_id] = {
             content: body.message,
-            count: 2
+            count: Math.round(Math.random() + 2)
         }
     }
 }
@@ -121,6 +122,35 @@ function maybeSend(body) {
         return true
     }
 }
+
+
+async function seven(body) {
+    const tip = '七日杀允许的指令有\n1,gt 获取当前时间\n2,lpi 查看当前在线人员\n3,lp 查看当前在线人员详细信息\n4,say [msg] 输入say 我是傻逼 可在游戏里说话\n例：.7d2d gt '
+    if (enableGroup.includes(body.group_id) && /七日杀指令/.test(body.message)) {
+        needle('GET', config.url + '/send_group_msg', {
+            group_id: body.group_id,
+            message: tip
+        }, {})
+        return
+    }
+
+        if (enableGroup.includes(body.group_id) && /\.7d2d/.test(body.message)) {
+        const dr = body.message.match(/(?<=\.7d2d)\s*\w+.*/)
+        if (dr) {
+            const msg = await getInfo(dr[0].trim())
+            needle('GET', config.url + '/send_group_msg', {
+                group_id: body.group_id,
+                message: msg
+            }, {})
+        }else{
+            needle('GET', config.url + '/send_group_msg', {
+                group_id: body.group_id,
+                message: tip
+            }, {})
+        }
+    }
+}
+
 
 function query(body) {
     if (enableGroup.includes(body.group_id) && /#[^#]+/.test(body.message)) {
@@ -303,6 +333,7 @@ module.exports = function (body) {
         if (maybeSend(body)) return;
         if (atMe(body)) return
         if (query(body)) return;
+        seven(body)
         repeat(body) //如果有重复2次的就复读消息
         // saveMsg(body)
         // recall(body)
