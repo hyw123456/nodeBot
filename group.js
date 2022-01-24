@@ -134,15 +134,19 @@ async function seven(body) {
         return
     }
 
-        if (enableGroup.includes(body.group_id) && /\.7d2d/.test(body.message)) {
+    if (enableGroup.includes(body.group_id) && /\.7d2d/.test(body.message)) {
         const dr = body.message.match(/(?<=\.7d2d)\s*\w+.*/)
         if (dr) {
-            const msg = await getInfo(dr[0].trim())
+            let text = dr[0].trim()
+            if(/^say/.test(text)){
+                text+= ' by '+(body.sender.card||body.sender.nickname)
+            }
+            const msg = await getInfo(text)
             needle('GET', config.url + '/send_group_msg', {
                 group_id: body.group_id,
                 message: msg
             }, {})
-        }else{
+        } else {
             needle('GET', config.url + '/send_group_msg', {
                 group_id: body.group_id,
                 message: tip
