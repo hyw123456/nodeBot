@@ -1,4 +1,5 @@
 var net = require('net');
+let cd = 0
 
 var socket
 function connect(){
@@ -34,13 +35,29 @@ socket.on("end", function (err) {
 })
 
 function getInfo(type) {
-    if(!/^(lp|lpi|gt|say)\s?/.test(type)){
+    if(!/^(lp|lpi|gt|say|sw)\s?/.test(type)){
         return '不允许的指令'
     }
     obj._content = []
+    if(type === 'sw'){
+        type = 'spawnwanderinghorde'
+        if(cd){
+            return '指令CD中'
+        }
+    }
     socket.write(type+"\r\n")
     if(/^say\s?/.test(type)){
         return 'server:'+type.replace(/say/, '')
+    }
+    if(type === 'spawnwanderinghorde'){
+        cd = 60
+        const inner = setInterval(() => {
+            cd--;
+            if(cd <=0){
+                clearInterval(inner)
+            }
+        }, 1000)
+        return '大波僵尸正在路上,在线玩家表示很赞'
     }
     return getMsg(type).then(res => {
         let result = res

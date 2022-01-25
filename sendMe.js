@@ -13,7 +13,6 @@ function tran(body){
 }
 
 async function days (body){
-    console.log(body);
     const tip = '七日杀允许的指令有\n1,gt 获取当前时间\n2,lpi 查看当前在线人员\n3,lp 查看当前在线人员详细信息\n4,say [msg] 输入say 我是傻逼 可在游戏里说话\n例：.7d2d gt '
     if (/七日杀指令/.test(body.message)) {
         needle('GET', config.url + '/send_private_msg', {
