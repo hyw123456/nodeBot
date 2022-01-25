@@ -44,7 +44,7 @@ function getInfo(type) {
     }
     return getMsg(type).then(res => {
         let result = res
-        result = result.replace(/e?t from [\d.:]*\r?\n?/, '')
+        result = result.replace(/n?e?t from [\d.:]*\r\n/, '')
         result = result.replace(/202.*\r\n/, '')
         return result
     })
@@ -53,11 +53,13 @@ function getInfo(type) {
 function getMsg(type) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
+            console.log(obj.content);
             const list = [...obj.content].reverse()
             const index  =  list.findIndex(i => {
-                return ~i.indexOf(`command '${type}' by Teln`)
+                return ~i.indexOf(`command '${type}' by Tel`)
             })
             if(~index){
+                console.log(list.length - (index - 1) - 1);
                 resolve(obj.content[list.length-(index-1)-1])
             }else{
                 reject()

@@ -12,9 +12,6 @@ const loop = require('./loopSearch.js')
 loop()
 app.post('/', function (req, res) {
     const body = req.body
-    console.log(1);
-    console.log(body);
-    console.log(2);
     if(body.meta_event_type !== 'heartbeat'){
       if(body.group_id){
         group(body)
