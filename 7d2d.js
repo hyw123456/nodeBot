@@ -1,11 +1,15 @@
 var net = require('net');
 
-var socket = net.connect({
-    host: '120.27.151.130',
-    port: 8081
-}, function () {
-    socket.write("CHANGEME\r\n")
-})
+var socket
+function connect(){
+    socket = net.connect({
+        host: '120.27.151.130',
+        port: 8081
+    }, function () {
+        socket.write("CHANGEME\r\n")
+    })
+}
+connect()
 var obj = {
     _content: [],
     set content(text) {
@@ -24,12 +28,16 @@ socket.on("data", function (data) {
 
 socket.on("end", function (err) {
     console.log("end");
+    setTimeout(() => {
+        connect()
+    })
 })
 
 function getInfo(type) {
     if(!/^(lp|lpi|gt|say)\s?/.test(type)){
         return '不允许的指令'
     }
+    obj._content = []
     socket.write(type+"\r\n")
     if(/^say\s?/.test(type)){
         return 'server:'+type.replace(/say/, '')
@@ -45,12 +53,12 @@ function getInfo(type) {
 function getMsg(type) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            const list = obj.content
+            const list = [...obj.content].reverse()
             const index  =  list.findIndex(i => {
                 return ~i.indexOf(`command '${type}' by Teln`)
             })
             if(~index){
-                resolve(list[index+1])
+                resolve(obj.content[list.length-(index-1)-1])
             }else{
                 reject()
             }
