@@ -8,6 +8,15 @@ const {getSCYImgAndCode} = require('./scy')
 const {translateEachOther} = require('./gugu')
 const {getInfo} = require('./7d2d')
 let isSS = true
+let userInfo = {
+    nickname: '',
+    user_id: ''
+}
+async function getUserInfo(){
+    const data = await needle('GET', config.url + '/get_login_info', {}, {})
+    userInfo = data.body.data
+}
+getUserInfo()
 
 schedule.scheduleJob('2 0 8 * * *', () => {
     sendST(undefined, '今天你波奇了吗')
@@ -48,7 +57,7 @@ async function repeat(body) {
 }
 
 async function recall(body) {
-    if ([2382843038, 727295117].includes(body.operator_id)) return
+    if ([userInfo.user_id, 727295117].includes(body.operator_id)) return
     if (!enableGroup.includes(body.group_id)) return
     if (body.notice_type === 'group_recall') {
         const res = await needle('GET', config.url + '/get_msg', {message_id: body.message_id}, {})
@@ -227,7 +236,7 @@ async function sendSCYImg(body, count = 1) {
 }
 
 function atMe(body) {
-    if (body.message && /\[CQ:at,qq=2382843038\]/.test(body.message)) {
+    if (body.message && ~body.message.indexOf(`[CQ:at,qq=${userInfo.user_id}]`)) {
         let message = body.message.replace(/\[CQ:at,qq=\d+\]/g, '')
         const text = translateEachOther(message.trim())
         needle('GET', config.url + '/send_group_msg', {
