@@ -131,11 +131,19 @@ function maybeSend(body) {
         return true
     }
 }
+// const auth = '635045571'
+// const auth = '655389537'
 
 
 async function seven(body) {
-    const tip = '七日杀允许的指令有\n1, gt 获取当前时间\n2, lpi 查看当前在线人员\n3, lp 查看当前在线人员详细信息\n4, say [msg] 输入say 我是傻逼 可在游戏里说话\n5, sw 刷一大波僵尸\n例：.7d2d gt '
-    if (enableGroup.includes(body.group_id) && /七日杀指令/.test(body.message)) {
+    const tip = `七日杀允许的指令有
+1, gt 获取当前时间
+2, lpi 查看当前在线人员
+3, lp 查看当前在线人员详细信息
+4, say [msg] 输入say 我是傻逼 可在游戏里说话
+5, sw 刷一大波僵尸
+${body.group_id == config.authGroup? '6, st 调整游戏时间，如st 6 11 12调整到第6天早上11点12分\n7, tp 传送，如 tp 171 856.将id为171玩家传到id: 856边上，id用lpi指令获取\n':''}例：.7d2d gt `
+    if (/七日杀指令/.test(body.message)) {
         needle('GET', config.url + '/send_group_msg', {
             group_id: body.group_id,
             message: tip
@@ -143,14 +151,24 @@ async function seven(body) {
         return
     }
 
-    if (enableGroup.includes(body.group_id) && /\.7d2d/.test(body.message)) {
+    if (/\.7d2d/.test(body.message)) {
         const dr = body.message.match(/(?<=\.7d2d)\s*\w+.*/)
         if (dr) {
             let text = dr[0].trim()
             if(/^say/.test(text)){
-                text+= ' by '+(body.sender.card||body.sender.nickname)
+                text+= '。by:'+(body.sender.card||body.sender.nickname)
+                text = text.replace(/\s+/g, ',')
             }
-            const msg = await getInfo(text)
+            if(/^tp/){
+                text = text.replace(/^tp/, 'teleportplayer')
+            }
+            let msg = ''
+            let reg = body.group_id == config.authGroup? /^(lp|lpi|gt|say|sw|teleportplayer|st)\s?/:/^(lp|lpi|gt|say|sw)\s?/
+            if(!reg.test(text)){
+                msg = '不允许的指令'
+            }else{
+                 msg = await getInfo(text)
+            }
             needle('GET', config.url + '/send_group_msg', {
                 group_id: body.group_id,
                 message: msg
@@ -341,12 +359,12 @@ async function cardNew(body) {
 }
 
 module.exports = function (body) {
+    seven(body)
     if (groups.includes(body.group_id)) { // 只在咕群生效
         if (isAtAll(body)) return;
         if (maybeSend(body)) return;
         if (atMe(body)) return
         if (query(body)) return;
-        seven(body)
         repeat(body) //如果有重复2次的就复读消息
         // saveMsg(body)
         // recall(body)

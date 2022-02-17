@@ -1,16 +1,33 @@
 var net = require('net');
 let cd = 0
 
-var socket
+var socket,isConnect = false;
 function connect(){
-    socket = net.connect({
-        host: '120.27.151.130',
-        port: 8081
-    }, function () {
-        socket.write("CHANGEME\r\n")
+    return new Promise((resolve) => {
+        socket = net.connect({
+            host: '120.27.151.130',
+            port: 8081
+        }, function () {
+            socket.write("CHANGEME\r\n")
+            isConnect = true
+            resolve()
+
+
+            socket.on("data", function (data) {
+                obj.content = data.toString()
+            })
+            
+            socket.on("end", function (err) {
+                console.log("end");
+                isConnect = false
+            })
+
+
+        })
     })
+   
 }
-connect()
+
 var obj = {
     _content: [],
     set content(text) {
@@ -23,28 +40,19 @@ var obj = {
         return obj._content
     }
 }
-socket.on("data", function (data) {
-    obj.content = data.toString()
-})
 
-socket.on("end", function (err) {
-    console.log("end");
-    setTimeout(() => {
-        connect()
-    })
-})
 
-function getInfo(type) {
-    if(!/^(lp|lpi|gt|say|sw)\s?/.test(type)){
-        return '不允许的指令'
-    }
-    obj._content = []
+async function getInfo(type) {
     if(type === 'sw'){
         type = 'spawnwanderinghorde'
         if(cd){
             return '指令CD中'
         }
     }
+    if(!isConnect){
+        await connect()
+    }
+    obj._content = []
     socket.write(type+"\r\n")
     if(/^say\s?/.test(type)){
         return 'server:'+type.replace(/say/, '')
@@ -81,7 +89,7 @@ function getMsg(type) {
             }else{
                 reject()
             }
-        }, 500)
+        }, 300)
     })
 }
 
